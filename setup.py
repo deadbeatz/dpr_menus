@@ -7,8 +7,8 @@ setup(
     description = 'dPR Team: BBS Menuing System for Mystic BBS',
     author = 'Analog',
     author_email = 'analog@deadbeatz.org',
-    url = 'github package source url',
-    download_url = 'download link you saved',
+    url = 'https://github.com/deadbeatz/dpr_menus',
+    download_url = 'https://github.com/deadbeatz/dpr_menus/archive/v1.9.tar.gz',
     keywords = ['dpr', 'dpr_menus'],
     classifiers = [],
 )
