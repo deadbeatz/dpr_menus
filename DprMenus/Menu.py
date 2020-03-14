@@ -1,127 +1,6 @@
-from enum import Enum
-import sys, os, time, math, re
-
-# Virtual, override
-def writexy(x,y,string):
-    #bbs.write("|[X"+str(x).zfill(2)+"|[Y"+str(y).zfill(2)+str(string))
-    pass
-
-# Virtual, override
-def reset_colors(string):
-    pass
-
-def strip_mci(string):
-    # Strip only color and location codes so we can get an effective length
-    rgx_list = [r'(\|\[[XY]\d{2})' , r'(\|\d{2})']
-    new_text = string
-    for rgx_match in rgx_list:
-        new_text = re.sub(rgx_match, '', new_text)
-    return new_text
-
-# Top level class. Contains references to all Menus, which in turn hold all respective menu items
-class MenuList(object):
-    def __init__(self):
-        # List of all menus. Should be indexed off curr_menu. So the order you add them is the order
-        # they will index using next/prev menu functions
-        self.menus = []
-        self.__curr_menu = 0
-        
-    @property
-    def curr_menu(self):
-        return self.__curr_menu
-        
-    @curr_menu.setter
-    def curr_menu(self, new_menu):
-        # Do nothing
-        if self.__curr_menu is new_menu:
-            return
-        # If we are on the last menu, new menu will be first menu
-        if new_menu > len(self.menus) -1:
-            new_menu = 0
-        elif new_menu < 0:
-            new_menu = len(self.menus) -1
-
-        # Fire on leave for curr_menu before selecting new menu
-        self.menus[self.__curr_menu].on_leave()
-        # Update index		
-        self.__curr_menu = new_menu
-        # Fire on enter for new menu
-        self.menus[self.__curr_menu].on_enter()
-    
-    def init(self):
-        for menu in self.menus:
-            menu.on_init()
-
-    def next_menu(self, exclude=None):
-        if self.curr_menu +1 is exclude:
-            return
-        self.menus[self.curr_menu].on_leave()
-        self.curr_menu = self.curr_menu + 1
-        self.menus[self.curr_menu].on_enter()
-        #self.menus[self.curr_menu].on_select()
-
-    def prev_menu(self, exclude=None):
-        if self.curr_menu -1 is exclude:
-            return
-        self.menus[self.curr_menu].on_leave()
-        self.curr_menu = self.curr_menu - 1
-        self.menus[self.curr_menu].on_enter()
-        #self.menus[self.curr_menu].on_select()
-
-    def add(self, menu):
-        menu.id = len(self.menus)
-        menu.menu_list = self
-        self.menus.append(menu)
-    
-    def action(self, *args):
-        return self.menus[self.curr_menu].on_action(*args)
-
-    def draw_menus(self):
-        for menu in self.menus:
-            if menu.id == self.curr_menu:
-                menu.draw(is_active=True)
-            else:
-                menu.draw(is_active=False)
-
-    def draw_marquees(self, marquee_index):
-        for menu in self.menus:
-            if menu.id == self.curr_menu:
-                return menu.draw_marquee(marquee_index)
-
-    def scroll(self, direction):
-        menu = self.menus[self.curr_menu]
-        if menu.index is -1:
-            return
-        
-        menu.scroll(direction)
-
-    # Save some keystrokes by returning active menu
-    def active_menu(self):
-        return self.menus[self.curr_menu]
-
-class MenuDecorator:
-    def __init__(self, x, y, decorator, colors):
-        self.x = x
-        self.y = y
-        self.decorator = decorator
-        self.colors = colors
-
-    def draw(self):
-        writexy(self.x, self.y, self.colors + self.decorator)
-    
-    def clear(self):
-        writexy(self.x, self.y, ' ' * len(self.decorator))
-
-class ItemDecorator:
-    def __init__(self, decorator, colors):
-        self.decorator = decorator
-        self.colors = colors
-
-    def draw(self):
-        writexy(self.x, self.y, self.colors + self.decorator)
-    
-    def clear(self):
-        writexy(self.x, self.y, ' ' * len(self.decorator))
+from .Utils import Utils
+from .ScrollDir import ScrollDir
+import math
 
 class Menu(object):
     def __init__(self, name, x, top_y, bottom_y, col_width, left_pad=1, right_pad=1, decorators = [], isselectable = True, blockscroll = False, wraparound = True, scrollbar = True):
@@ -255,7 +134,7 @@ class Menu(object):
         counter = 0
         # Clear column
         for i in range(self.top_y, self.top_y + self.num_scr_lines):
-            writexy(self.x, i, ' ' * self.col_width)
+            Utils.writexy(self.x, i, ' ' * self.col_width)
         # Clear decorator if not selected
         if is_active:
             for decorator in self.decorators:
@@ -269,37 +148,36 @@ class Menu(object):
             if self.isselectable:
                 # If the item is the current selected item and this menu is selected
                 if self.index == self.top_index + counter and is_active:
-                    # These writexys return the string of the menu item. The item.mci_len is the length
+                    # These Utils.writexys return the string of the menu item. The item.mci_len is the length
                     # of the string plus color_string length. 
-                    writexy(xpad, self.top_y + counter, item.selected[:item.mci_len + self.act_width + item.decorator_len])
+                    Utils.writexy(xpad, self.top_y + counter, item.selected[:item.mci_len + self.act_width + item.decorator_len])
                 # If the item is the current selected item and this menu is not selected
                 elif self.index == self.top_index + counter and not is_active:
-                    writexy(xpad, self.top_y + counter, item.highlighted[:item.mci_len + self.act_width])
+                    Utils.writexy(xpad, self.top_y + counter, item.highlighted[:item.mci_len + self.act_width])
                 # All other items in the menu
                 else:
-                    writexy(xpad, self.top_y + counter, item.unselected[:item.mci_len + self.act_width])
+                    Utils.writexy(xpad, self.top_y + counter, item.unselected[:item.mci_len + self.act_width])
             else:
-                writexy(xpad, self.top_y + counter, item.unselected[:item.raw_mci_len + self.act_width])
+                Utils.writexy(xpad, self.top_y + counter, item.unselected[:item.raw_mci_len + self.act_width])
             counter = counter + 1
 
         if self.scrollbar is True:
             self.draw_scroll_bar()
 
-        reset_colors("|16|08")
-        #bbs.write("|16|08")
+        Utils.reset_colors()
 
     def draw_marquee(self, curr_index, is_active=False):
         counter = 0
         for item in self.items[self.top_index:self.top_index + self.num_scr_lines]:
             if self.index == self.top_index + counter and self.isselectable:
                 # Check if item can be marqueed (longer than act_width)
-                if self.act_width >= len(strip_mci(item.selected)):
+                if self.act_width >= len(Utils.strip_mci(item.selected)):
                     break
 
                 xpad = self.xpadded - item.decorator_len
 
                 # Check our item_index to see if we need to reset to beginning
-                if curr_index > len(strip_mci(item.selected)):
+                if curr_index > len(Utils.strip_mci(item.selected)):
                     curr_index = 0
 
                 text_start = curr_index + item.mci_len + item.decorator_len
@@ -308,11 +186,11 @@ class Menu(object):
                 if self.act_width - len(item.selected[text_start:]) > 0:
                     text_trail = (self.act_width - len(item.selected[text_start:])) * ' '
 
-                writexy(xpad, self.top_y + counter, item.selected[:item.decorator_len + item.mci_len] + \
+                Utils.writexy(xpad, self.top_y + counter, item.selected[:item.decorator_len + item.mci_len] + \
                     item.selected[text_start:text_end] + text_trail)
                 curr_index += 1
             counter = counter + 1
-        reset_colors("|16|08")
+        Utils.reset_colors()
         #bbs.write("|16|08")
         return curr_index
 
@@ -411,7 +289,7 @@ class Menu(object):
     def draw_scroll_bar(self):
         # Clear scrollbar area on redraw
         for i in range (0,self.num_scr_lines):
-            writexy(self.x + self.col_width, self.top_y + i, '|16 ')
+            Utils.writexy(self.x + self.col_width, self.top_y + i, '|16 ')
         # For sanity, we need to make sure we even need a scrollbar
         if len(self.items) <= self.num_scr_lines:
             return
@@ -440,74 +318,5 @@ class Menu(object):
             scroll_bar[scroll_bar_index] = indicator
         counter = 0
         for item in scroll_bar:
-            writexy(self.x+self.col_width, self.top_y+ counter, item)
+            Utils.writexy(self.x+self.col_width, self.top_y+ counter, item)
             counter+=1
-
-class MenuItem:
-    def __init__(self, name, id, string=None, selected_color="|23|00", unselected_color="|16|15", highlighted_color="|19|00", decorator = None, attr1 = None, attr2 = None, is_header=False, attributes={}):
-        self.name = name
-        self.id = id
-        self.__string = string
-        self.__selected_color = selected_color
-        self.__unselected_color = unselected_color
-        self.__highlighted_color = highlighted_color
-        self.decorator = decorator
-        self.is_active = False
-        self.string = string
-        self.attr1 = attr1
-        self.attr2 = attr2
-        self.is_header = is_header
-        self.attributes = {}
-        self.attributes.update(attributes)
-
-    
-
-    @property
-    def selected(self):
-        string = ""
-        if self.is_active and self.decorator is not None:
-            string += self.decorator.colors + self.decorator.decorator
-        string += str(self.__selected_color + strip_mci(self.string))
-        return string
-
-    @property
-    def unselected(self):
-        string = ""
-        if self.is_active and self.decorator is not None:
-            string += self.decorator.colors + self.decorator.decorator
-        string += str(self.__unselected_color + self.string)
-        return string
-
-    @property
-    def highlighted(self):
-        string = ""
-        if self.is_active and self.decorator is not None:
-            string += self.decorator.colors + self.decorator.decorator
-        string += str(self.__highlighted_color + strip_mci(self.string))
-        return string
-
-    # actual length of string is the string as rendered + MCI codes. So we need to tell the draw
-    # function how long the MCI codes are but differencing the regular and stripped strings
-    @property
-    def raw_mci_len(self):
-        return len(self.string) - len(strip_mci(self.string))
-
-    @property
-    def mci_len(self):
-        return len(self.selected) - len(strip_mci(self.selected))
-
-    @property
-    def decorator_len(self):
-        if self.decorator is not None and self.is_active:
-            return len(self.decorator.decorator)
-        return 0
-
-class ScrollDir(Enum):
-    up = 1
-    up_block = 2
-    down = 3
-    down_block = 4
-    up_page = 5
-    down_page = 6
-    home = 7
-    end = 8

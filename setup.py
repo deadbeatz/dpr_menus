@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="dpr-menus-Analog", # Replace with your own username
+    name="dpr-menus", # Replace with your own username
     version="1.9.0",
     author="Analog",
     author_email="analog@deadbeatz.org",
