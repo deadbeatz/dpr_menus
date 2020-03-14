@@ -1,10 +1,14 @@
-import mystic_bbs as bbs
 from enum import Enum
 import sys, os, time, math, re
-from enum import Enum
 
+# Virtual, override
 def writexy(x,y,string):
-    bbs.write("|[X"+str(x).zfill(2)+"|[Y"+str(y).zfill(2)+str(string))
+    #bbs.write("|[X"+str(x).zfill(2)+"|[Y"+str(y).zfill(2)+str(string))
+    pass
+
+# Virtual, override
+def reset_colors(string):
+    pass
 
 def strip_mci(string):
     # Strip only color and location codes so we can get an effective length
@@ -281,7 +285,8 @@ class Menu(object):
         if self.scrollbar is True:
             self.draw_scroll_bar()
 
-        bbs.write("|16|08")
+        reset_colors("|16|08")
+        #bbs.write("|16|08")
 
     def draw_marquee(self, curr_index, is_active=False):
         counter = 0
@@ -307,8 +312,8 @@ class Menu(object):
                     item.selected[text_start:text_end] + text_trail)
                 curr_index += 1
             counter = counter + 1
-
-        bbs.write("|16|08")
+        reset_colors("|16|08")
+        #bbs.write("|16|08")
         return curr_index
 
     def scroll(self, direction):
