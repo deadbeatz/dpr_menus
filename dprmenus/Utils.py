@@ -1,5 +1,5 @@
 import re
-import mystic_bbs as bbs
+import mystic_bbs as bbs # pylint: disable=import-error
 
 
 class Utils:
