@@ -3,5 +3,5 @@
 
 # Install #
 To install:
-```pip install dprmenus```
+```pip install dprMenus```
 
