@@ -1,11 +1,11 @@
 # from distutils.core import setup
 from setuptools import setup
 setup(
-  name = 'dpr-menus',
-  packages = ['dpr-menus'],
+  name = 'dprMenus',
+  packages = ['dprMenus'],
   version = '1.9.1',
   license='MIT',
-  description = 'dPR Team: Menus for Mystic BBS',
+  description = '.dpr. Team: Menus for Mystic BBS',
   author = 'Analog',
   author_email = 'analog@deadbeatz.org',
   url = 'https://github.com/deadbeatz/dpr_menus',
