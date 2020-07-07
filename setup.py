@@ -3,13 +3,13 @@ from setuptools import setup
 setup(
   name = 'dprMenus',
   packages = ['dprMenus'],
-  version = '1.9.1',
+  version = '1.9.2',
   license='MIT',
   description = '.dpr. Team: Menus for Mystic BBS',
   author = 'Analog',
   author_email = 'analog@deadbeatz.org',
   url = 'https://github.com/deadbeatz/dpr_menus',
-  download_url = 'https://github.com/deadbeatz/dpr_menus/archive/v1.9.0.tar.gz',
+  download_url = 'https://github.com/deadbeatz/dpr_menus/archive/v1.9.2.tar.gz',
   keywords = ['Mystic', 'BBS', 'dpr', 'menus'],
   install_requires=[],
   classifiers=[
