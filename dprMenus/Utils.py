@@ -5,7 +5,14 @@ import mystic_bbs as bbs # pylint: disable=import-error
 class Utils:
     @staticmethod
     def draw_box(y_height, color="|03"):
-  
+        flush_stdio = False
+        try:
+            build = int(bbs.mci2str("VR").split(' ')[1][1:])
+            if build >= 46:
+                flush_stdio = True
+        except ValueError:
+            pass
+            
         vert_line = chr(179)
         top_rt = chr(191)
         top_lt = chr(218)
@@ -21,9 +28,12 @@ class Utils:
             bbs.write("|[X"+str(x_loc).zfill(2) +"|[Y"+ str(y).zfill(2) + vert_line + vert_line)
 
         bbs.write("|[X"+str(x_loc).zfill(2) +"|[Y"+ str(y_loc+1+y_height).zfill(2) + bot_lt + bot_rt)
-        # To force it before delay bug
-        bbs.write("|[X"+str(x_loc).zfill(2) +"|[Y"+ str(y_loc+1+y_height).zfill(2) + bot_lt + bot_rt)
+        if not flush_stdio:
+            # To force it before delay bug
+            bbs.write("|[X"+str(x_loc).zfill(2) +"|[Y"+ str(y_loc+1+y_height).zfill(2) + bot_lt + bot_rt)
         for i in range(0,38):
+            if flush_stdio:
+                bbs.flush()
             bbs.delay(10)
             bbs.write("|[X"+str(x_loc-i).zfill(2) +"|[Y"+ str(y_loc).zfill(2) + top_lt + line)
             bbs.write("|[X"+str(x_loc+i).zfill(2) +"|[Y"+ str(y_loc).zfill(2) + line + top_rt)
@@ -32,8 +42,11 @@ class Utils:
                 bbs.write("|[X"+str(x_loc + i).zfill(2) +"|[Y"+ str(y).zfill(2) + ' ' + vert_line)
             bbs.write("|[X"+str(x_loc-i).zfill(2) +"|[Y"+ str(y_loc+1+y_height).zfill(2) + bot_lt + line)
             bbs.write("|[X"+str(x_loc+i).zfill(2) +"|[Y"+ str(y_loc+1+y_height).zfill(2) + line + bot_rt)
-            # To force it before delay bug
-            bbs.write("|[X"+str(x_loc+i).zfill(2) +"|[Y"+ str(y_loc+1+y_height).zfill(2) + line + bot_rt)
+            if not flush_stdio:
+                # To force it before delay bug
+                bbs.write("|[X"+str(x_loc+i).zfill(2) +"|[Y"+ str(y_loc+1+y_height).zfill(2) + line + bot_rt)
+        if flush_stdio:
+            bbs.flush()
         bbs.delay(50)
     
     # Virtual, override
